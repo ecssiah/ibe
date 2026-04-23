@@ -154,9 +154,9 @@ impl AnimationData {
 
 fn animate_character(
     time: Res<Time>,
-    mut query: Query<(&mut AnimationData, &mut Sprite, &Character)>
+    mut query: Query<(&mut AnimationData, &mut Sprite)>
 ) {
-    for (mut animation_data, mut sprite, character) in &mut query {
+    for (mut animation_data, mut sprite) in &mut query {
         animation_data.frame_timer.tick(time.delta());
 
         if animation_data.frame_timer.just_finished() && let Some(atlas) = &mut sprite.texture_atlas {
