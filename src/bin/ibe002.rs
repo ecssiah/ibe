@@ -1,4 +1,8 @@
-use bevy::{prelude::*, image::ImagePlugin};
+use bevy::{
+    prelude::*,
+    image::{ImagePlugin, ImageArrayLayout, ImageLoaderSettings},
+    sprite_render::{TileData, TilemapChunk, TilemapChunkTileData},
+};
 
 fn main() {
     App::new()
@@ -7,7 +11,7 @@ fn main() {
                 ImagePlugin::default_nearest()
             )
         )
-        .add_systems(Startup, (setup_camera, setup_character))
+        .add_systems(Startup, (setup_camera, setup_character, setup_tilemap).chain())
         .add_systems(Update, move_character)
         .run();
 }
@@ -38,6 +42,45 @@ fn setup_character(
         Sprite::from_image(sprite_image_handle),
         Transform::from_xyz(0., 0., 0.)
             .with_scale(Vec3::splat(6.0))
+    ));
+}
+
+fn setup_tilemap(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let chunk_size = UVec2::new(16, 8);
+    let tile_display_size = UVec2::new(64, 64);
+
+    let mut tile_data: Vec<Option<TileData>> = vec![None; chunk_size.element_product() as usize];
+
+    for y in 0..chunk_size.y {
+        for x in 0..chunk_size.x {
+            let tile_index = (x + y * chunk_size.x) as usize;
+
+            if y < chunk_size.y / 2 - 2 {
+                tile_data[tile_index] = Some(TileData::from_tileset_index(1));
+            } else if y < chunk_size.y / 2 - 1 {
+                tile_data[tile_index] = Some(TileData::from_tileset_index(0));
+            } else {
+                tile_data[tile_index] = None;
+            }
+        }
+    }
+
+    commands.spawn((
+        TilemapChunk {
+            chunk_size,
+            tile_display_size,
+            tileset: asset_server.load_with_settings(
+                "textures/array_texture.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.array_layout = Some(ImageArrayLayout::RowCount { rows: 4 });
+                },
+            ),
+            ..default()
+        },
+        TilemapChunkTileData(tile_data),
     ));
 }
 
