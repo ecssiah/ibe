@@ -7,7 +7,7 @@ fn main() {
                 ImagePlugin::default_nearest()
             )
         )
-        .add_systems(Startup, setup)
+        .add_systems(Startup, setup_character)
         .add_systems(Update, move_character)
         .run();
 }
@@ -17,15 +17,17 @@ struct Character {
     speed: f32,
 }
 
-fn setup(
+fn setup_character(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
     commands.spawn(Camera2d);
 
+    let sprite_image_handle = asset_server.load("textures/rpg/chars/hat-guy/hat-guy.png");
+
     commands.spawn((
         Character { speed: 256.0 }, 
-        Sprite::from_image(asset_server.load("textures/rpg/chars/hat-guy/hat-guy.png")),
+        Sprite::from_image(sprite_image_handle),
         Transform::from_xyz(0., 0., 0.)
             .with_scale(Vec3::splat(6.0))
     ));
