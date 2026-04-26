@@ -6,14 +6,23 @@ use bevy::{
 };
 
 fn main() {
+    let plugins = DefaultPlugins.set(ImagePlugin::default_nearest());
+    
+    let startup_systems = (
+        setup_camera,
+        setup_character,
+        setup_tilemap,
+    );
+
+    let update_systems = (
+        move_character,
+        animate_character,
+    );
+    
     App::new()
-        .add_plugins(
-            DefaultPlugins.set(
-                ImagePlugin::default_nearest()
-            )
-        )
-        .add_systems(Startup, (setup_camera, setup_character, setup_tilemap).chain())
-        .add_systems(Update, (move_character, animate_character))
+        .add_plugins(plugins)
+        .add_systems(Startup, startup_systems.chain())
+        .add_systems(Update, update_systems)
         .run();
 }
 
